@@ -21,6 +21,7 @@ async function run() {
 		await client.connect();
 		const database = client.db("doctors_portal");
 		const appointmentsCollection = database.collection("appointments");
+		const usersCollection = database.collection("users");
 		console.log("connection database successfully");
 
 		// app.get database theke ui er dashboard dekhanor jonno---- part(2)---
@@ -28,7 +29,7 @@ async function run() {
 			const email = req.query.email;
 			// date ke new Date kora hoise eijonno niche same vabe cnvrt--
 			const date = new Date(req.query.date).toLocaleDateString();
-			console.log(date);
+			// console.log(date);
 			const query = { email: email, date: date };
 			// console.log(query);
 			const cursor = appointmentsCollection.find(query);
@@ -40,6 +41,36 @@ async function run() {
 			const appointment = req.body;
 			const result = await appointmentsCollection.insertOne(appointment);
 			console.log(result);
+			res.json(result);
+		});
+
+		// create email user collection database rakhar jonno------------
+		app.post("/users", async (req, res) => {
+			const user = req.body;
+			const result = await usersCollection.insertOne(user);
+			console.log(result);
+			res.json(result);
+		});
+		// google login user collection data rakhar jonno--------------
+		app.put("/users", async (req, res) => {
+			const user = req.body;
+			const filter = { email: user.email };
+			const options = { upsert: true };
+			const updateDoc = { $set: user };
+			const result = await usersCollection.updateOne(
+				filter,
+				updateDoc,
+				options
+			);
+			res.json(result);
+		});
+		// admin korar jonno---------------------------
+		app.put("/users/admin", async (req, res) => {
+			const user = req.body;
+			console.log("put", user);
+			filter = { email: user.email };
+			const updateDoc = { $set: { role: "admin" } };
+			const result = await usersCollection.updateOne(filter, updateDoc);
 			res.json(result);
 		});
 	} finally {

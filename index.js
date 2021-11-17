@@ -67,11 +67,22 @@ async function run() {
 		// admin korar jonno---------------------------
 		app.put("/users/admin", async (req, res) => {
 			const user = req.body;
-			console.log("put", user);
-			filter = { email: user.email };
+			console.log("put", user.authorization);
+			const filter = { email: user.email };
 			const updateDoc = { $set: { role: "admin" } };
 			const result = await usersCollection.updateOne(filter, updateDoc);
 			res.json(result);
+		});
+		// admin ke pawar jonno----------------------------
+		app.get("/users/:email", async (req, res) => {
+			const email = req.params.email;
+			const query = { email: email };
+			const user = await usersCollection.findOne(query);
+			let isAdmin = false;
+			if (user.role === "admin") {
+				isAdmin = true;
+			}
+			res.send({ admin: isAdmin });
 		});
 	} finally {
 		// await client.close();
